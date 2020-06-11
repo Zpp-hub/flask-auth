@@ -1,0 +1,8 @@
+Flask==1.1.1
+pymongo
+sentry-sdk[flask]
+pymysql
+scikit-learn
+matplotlib
+requests
+redis
