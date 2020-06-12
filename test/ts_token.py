@@ -1,32 +1,23 @@
 # -*- coding: utf-8 -*-
-import time
-import json
-import hashlib
-import copy
-import random
-import string
-from requests import request
+import unittest, requests, copy, hashlib, time, json
 from ConfigHelper.ConfigHelper import ConfigHelper
-from urllib.parse import urljoin
-import requests, unittest
 
 config = ConfigHelper()
 
-class oauth(object):
-# class Test_user(unittest.TestCase):
-    # def setUp(self):
-    def __init__(self, access_token, username, password):
+class Test_user(unittest.TestCase):
+    # before
+    def setUp(self):
+        print('Case Before')
         self.system = config.ConfigSectionMapCompatiable('AUTH_CONFIG', 'SYSTEM')
         self.secret = config.ConfigSectionMapCompatiable('AUTH_CONFIG', 'SECRET')
-        # self.host = config.ConfigSectionMapCompatiable('AUTH_CONFIG', 'HOST')
-        self.host_url = "http://localhost:3050"
-        self.accessToken = ''
-        self.username = 'op'
-        self.password = '123'
+        self.headers = {"Content-Type": "application/json;charset=utf-8"}
+        self.host_url = "http://localhost:3060"
         self.base_params = {
             'system': self.system,
             'timestamp': str(int(time.time()) * 1000)
         }
+        print('Case Before')
+        pass
 
     def get_sign(self, param, body, app_secret):
         sorted_params = sorted(list(param.items()), key=lambda x: x[0])
@@ -40,225 +31,37 @@ class oauth(object):
         m.update(encodestring.encode('utf-8'))
         sign = m.hexdigest()
 
-        # print('签名前：' + encodestring)
-        # print('签名后：' + sign)
+        print('签名前：' + encodestring)
+        print('签名后：' + sign)
 
         return sign
 
-    @staticmethod
-    def genRandomString(slen=10):
-        return ''.join(random.sample(string.ascii_letters + string.digits, slen))
-
-    '''
-
-    {
-
-        "message":null,
-        "code":1,
-        "data":{
-            "expireIn":3600,
-            "refreshToken":"089ebc5f35d64850b6c21ed3287893c1",
-            "tokenType":"bearer",
-            "accessToken":"04dec8e688774333b523076f9cdf5f33",
-            "scope":"create"
-        },
-        "success":true
-
-    }
-
-    '''
-
-    def auth(self):
-        headers = {"Content-Type": "application/json;charset=utf-8"}
+    def test_get_auth(self):
+        # payload = '{"user": "op", "pwd": "123"}'
         params = copy.deepcopy(self.base_params)
-
-        params['username'] = self.username
-        params['password'] = self.password
+        params['username'] = 'op'
+        params['password'] = '123'
         payload = {}
         params['sign'] = self.get_sign(params, json.dumps(payload), self.secret)
-        rst = requests.post(self.host_url + "/api/token/auth", params=params, headers=headers)
-        # print(json.dumps(response.json(), ensure_ascii=False))
+        req = requests.post(self.host_url + "/api/token/auth", params=params, data=json.dumps(payload), headers=self.headers)
+        user_list = req.json()
+        print(user_list)
+        # params = {'system': 'operation-platform', 'timestamp': '1591860425000', 'username': 'op', 'password': '123', 'sign': 'a771df0dad0dc331dcfe723e623de001'}
 
-        return rst.json()
-
-    '''
-
-    {
-
-        "message":null,
-        "code":1,
-        "data":{
-            "username":"zhangbing",
-            "status":1,
-            "updateTime":"2019-07-26T10:59:44.000+0800",
-            "realName":null,
-            "lastLoginIp":"",
-            "gender":"M",
-            "createTime":"2019-07-26T10:59:44.000+0800",
-            "id":100077,
-            "phone":"18578437843",
-            "systemCode":32,
-            "version":1,
-            "avatar":null,
-            "nickName":null,
-            "email":null,
-            "statusJson":null
-        },
-        "success":true
-
-    }
-
-    '''
-
-    # def checkToken(self):
-    #     checkurl = urljoin(self.host, '/checkToken')
-    #     headers = {"Authorization": "Bearer "}
-    #     headers["Authorization"] = "Bearer " + self.accessToken
-    #     params = copy.deepcopy(self.base_params)
-    #
-    #     params['sign'] = self.get_sign(params, '', self.secret)
-    #     response = request('GET', checkurl, params=params, headers=headers)
-    #     # print(json.dumps(response.json(), ensure_ascii=False))
-    #     ret = response.json()
-    #     if ret['code'] == 1:
-    #         return ret['data']
-    #     else:
-    #         return None
-    #
-    # def getUserInfo(self):
-    #     tp_url = urljoin(self.host, 'user/getUserInfo')
-    #     params = copy.deepcopy(self.base_params)
-    #     params['username'] = self.username
-    #     params['sign'] = self.get_sign(params, '', self.secret)
-    #
-    #     response = request('GET', tp_url, params=params)
-    #     # print(json.dumps(response.json(), ensure_ascii=False))
-    #     return response.json()
-    #
-    # def addUser(self, gender, phone, email, realname):
-    #     url = urljoin(self.host, '/user/')
-    #     headers = {"Content-Type": "application/json;charset=utf-8"}
-    #     payload = {
-    #         "username": self.username,
-    #         "password": self.password,
-    #         "gender": gender,
-    #         "phone": phone,
-    #         "email": email,
-    #         "realName": realname,
-    #         "system": self.system
-    #     }
-    #     params = copy.deepcopy(self.base_params)
-    #     params['sign'] = self.get_sign(params, json.dumps(payload), self.secret)
-    #     response = request('POST', url, params=params, data=json.dumps(payload), headers=headers)
-    #     # print(json.dumps(response.json(), ensure_ascii=False))
-    #     return response.json()
-    #
-    # '''
-    #
-    # {
-    #
-    #     "message":null,
-    #     "code":1,
-    #     "data":{
-    #         "rows":[
-    #             {
-    #                 "username":"just_tniQawIgdC",
-    #                 "status":1,
-    #                 "updateTime":"2019-07-26T10:56:21.000+0800",
-    #                 "realName":null,
-    #                 "lastLoginIp":"",
-    #                 "gender":"M",
-    #                 "createTime":"2019-07-26T10:56:21.000+0800",
-    #                 "id":100076,
-    #                 "phone":"18578437843",
-    #                 "systemCode":32,
-    #                 "version":1,
-    #                 "avatar":null,
-    #                 "nickName":null,
-    #                 "email":null,
-    #                 "statusJson":null
-    #             },
-    #             {
-    #                 "username":"zhangbing",
-    #                 "status":1,
-    #                 "updateTime":"2019-07-26T10:59:44.000+0800",
-    #                 "realName":null,
-    #                 "lastLoginIp":"",
-    #                 "gender":"M",
-    #                 "createTime":"2019-07-26T10:59:44.000+0800",
-    #                 "id":100077,
-    #                 "phone":"18578437843",
-    #                 "systemCode":32,
-    #                 "version":1,
-    #                 "avatar":null,
-    #                 "nickName":null,
-    #                 "email":null,
-    #                 "statusJson":null
-    #             }
-    #         ],
-    #         "total":18
-    #     },
-    #     "success":true
-    #
-    # }
-    #
-    # '''
-    #
-    # def getUserList(self, offset, limit):
-    #     url = urljoin(self.host, '/user/list')
-    #     params = copy.deepcopy(self.base_params)
-    #     params['offset'] = str(offset)
-    #     params['limit'] = str(limit)
-    #     params['sort'] = "id"
-    #     params['orderBy'] = "DESC"
-    #     params['sign'] = self.get_sign(params, '', self.secret)
-    #     response = request('GET', url, params=params)
-    #     return response.json()
-    #
-    # def logout(self):
-    #     authurl = urljoin(self.host, '/logout')
-    #     headers = {"Authorization": "Bearer "}
-    #     headers["Authorization"] = "Bearer " + self.accessToken
-    #     params = copy.deepcopy(self.base_params)
-    #
-    #     payload = {}
-    #     params['sign'] = self.get_sign(params, json.dumps(payload), self.secret)
-    #     response = request('POST', authurl, params=params, data=json.dumps(payload), headers=headers)
-    #     # print(json.dumps(response.json(), ensure_ascii=False))
-    #
-    #     return response.json()
-    #
-    # def getUserInfoById(self, id):
-    #     tp_url = urljoin(self.host, 'user/getUserInfo')
-    #     params = copy.deepcopy(self.base_params)
-    #     params['id'] = id
-    #     params['sign'] = self.get_sign(params, '', self.secret)
-    #     response = request('GET', tp_url, params=params)
-    #     # print(json.dumps(response.json(), ensure_ascii=False))
-    #     return response.json()
-    #
-    # def updateUser(self, gender, phone, email, realname, user_id):
-    #     addUserInfoRequestURL = urljoin(self.host, '/user/')
-    #     headers = {"Content-Type": "application/json;charset=utf-8"}
-    #     payload = {
-    #         "id": user_id,
-    #         "username": self.username,
-    #         "gender": gender,
-    #         "phone": phone,
-    #         "email": email,
-    #         "realName": realname,
-    #         "system": self.system
-    #     }
-    #     params = copy.deepcopy(self.base_params)
-    #     params['sign'] = self.get_sign(params, json.dumps(payload), self.secret)
-    #
-    #     response = request('PUT', addUserInfoRequestURL, params=params, data=json.dumps(payload), headers=headers)
-    #     # print(json.dumps(response.json(), ensure_ascii=False))
-    #     return response.json()
-    #
-
-
+"""
+out:
+{'code': 1,
+    'message': 'success',
+    'data': {
+        'accessToken': 'a0ce9bc34fb5453ca0fac3d18c5a0549',
+        'refreshToken': '812635f28c374c33b3980aa00446098e',
+        'tokenType': 'bearer',
+        'expireIn': 86400,
+        'scope': 'create'
+    },
+    'success': True
+}
+"""
 if __name__ == '__main__':
-    oauth2 = oauth("", 'op', '123')
-    result = oauth2.auth()
-    # unittest.main()
+    unittest.main()
+

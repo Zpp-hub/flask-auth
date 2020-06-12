@@ -6,10 +6,24 @@ routes = Blueprint("token", __name__)
 # headers = {'Date': 'Thu, 11 Jun 2020 03:56:45 GMT', 'Content-Type': 'application/json;charset=UTF-8', 'Content-Length': '208', 'Connection': 'keep-alive'}
 # params = {'system': 'operation-platform', 'timestamp': '1591860425000', 'username': 'op', 'password': '123', 'sign': 'a771df0dad0dc331dcfe723e623de001'}
 
+"""
+out:
+{'code': 1,
+    'message': 'success',
+    'data': {
+        'accessToken': 'a0ce9bc34fb5453ca0fac3d18c5a0549',
+        'refreshToken': '812635f28c374c33b3980aa00446098e',
+        'tokenType': 'bearer',
+        'expireIn': 86400,
+        'scope': 'create'
+    },
+    'success': True
+}
+"""
 
 @routes.route("/auth", methods=["POST"])
 def get_auth():
-    result = {"statusCode": 1, "message": "ok", "data": None}
+    result = {"statusCode": 1, "message": "ok", "data": None, 'success': False}
     params = {}
     for i in request.args:
         params[i] = request.args[i]
